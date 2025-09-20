@@ -1,9 +1,10 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import type { ExtendedRequest } from "../type/extendedRequest.js";
+import { findUserByUsername } from "../services/user.js";
 
-export const createJWT = (slug: string) => {
-  return jwt.sign({ slug }, process.env.JWT_SECRET as string)
+export const createJWT = (username: string) => {
+  return jwt.sign({ username }, process.env.JWT_SECRET as string)
 }
 
 export const verifyJWT = (req: ExtendedRequest, res: Response, next: NextFunction) => {
@@ -28,13 +29,13 @@ export const verifyJWT = (req: ExtendedRequest, res: Response, next: NextFunctio
         return;
       }
 
-      // const user = await findUserBySlug(decoded.slug);
-      // if(!user){
-      //   res.status(401).json({ error: 'Acesso negado 3' });
-      //   return;
-      // }
+      const user = await findUserByUsername(decoded.username);
+      if(!user){
+        res.status(401).json({ error: 'Acesso negado 3' });
+        return;
+      }
 
-      req.userSlug = decoded.slug;
+      req.userLogged = decoded.username;
       next();
     }
   )

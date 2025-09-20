@@ -24,3 +24,27 @@ export const createUser = async (data: Prisma.usersCreateInput) => {
 
   return newUser;
 }
+
+export const getUserFollowingCount = async (id: number) => {
+  const followingCount = await prisma.following.count({
+    where: { follower_id: id }
+  })
+
+  return followingCount;
+}
+
+export const getUserFollowersCount = async (id: number) => {
+  const followersCount = await prisma.following.count({
+    where: { following_id: id }
+  })
+
+  return followersCount;
+}
+
+export const getUserPostsCount = async (id: number) => {
+  const postsCount = await prisma.posts.count({
+    where: { user_id: id }
+  })
+
+  return postsCount;
+}
