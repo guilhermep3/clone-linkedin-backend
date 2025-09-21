@@ -1,5 +1,5 @@
 import type { Response } from "express";
-import { findUserByUsername, getUserFollowersCount, getUserFollowingCount, getUserPostsCount } from "../services/user.js";
+import { findUserByUsername, findUserExperiences, getUserFollowersCount, getUserFollowingCount, getUserPostsCount } from "../services/user.js";
 import type { ExtendedRequest } from "../type/extendedRequest.js";
 import { userPostsSchema } from "../schema/userPosts.js";
 import { findPostsByUser } from "../services/post.js";
@@ -45,4 +45,18 @@ export const getUserPosts = async (req: ExtendedRequest, res: Response) => {
   }
 
   res.json({ posts, page: currentPage });
+}
+
+export const getUserExperiences = async (req: ExtendedRequest, res: Response) => {
+  const username = req.params.username as string;
+
+  const user = await findUserByUsername(username);
+  if (!user) {
+    res.status(404).json({ error: 'Usuário não encontrado' });
+    return;
+  }
+
+  const experiences = await findUserExperiences(user.id);
+
+  res.json({ experiences });
 }

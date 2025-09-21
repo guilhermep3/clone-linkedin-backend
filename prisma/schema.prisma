@@ -17,24 +17,28 @@ model certificates {
 }
 
 model companies {
-  id                     Int             @id @default(autoincrement())
-  name                   String          @db.VarChar(100)
-  username               String          @unique(map: "username") @db.VarChar(40)
-  email                  String          @unique(map: "email") @db.VarChar(100)
-  password               String          @db.VarChar(255)
-  phone                  String?         @db.VarChar(20)
-  country                String?         @db.VarChar(40)
-  state                  String?         @db.VarChar(40)
-  city                   String?         @db.VarChar(80)
-  industry               String          @db.VarChar(40)
-  bio                    String?         @db.VarChar(200)
-  about                  String?         @db.Text
-  website                String?         @db.VarChar(200)
-  presentation_video_url String?         @db.VarChar(400)
+  id                     Int                      @id @default(autoincrement())
+  name                   String                   @db.VarChar(100)
+  username               String                   @unique(map: "username") @db.VarChar(40)
+  email                  String                   @unique(map: "email") @db.VarChar(100)
+  password               String                   @db.VarChar(255)
+  phone                  String?                  @db.VarChar(20)
+  country                String?                  @db.VarChar(40)
+  state                  String?                  @db.VarChar(40)
+  city                   String?                  @db.VarChar(80)
+  industry               String                   @db.VarChar(40)
+  bio                    String?                  @db.VarChar(200)
+  about                  String?                  @db.Text
+  website                String?                  @db.VarChar(200)
+  avatar                 String                   @default("default.jpg") @db.VarChar(200)
+  cover                  String                   @default("default.jpg") @db.VarChar(200)
+  presentation_video_url String?                  @db.VarChar(400)
   size                   companies_size?
-  verified               Boolean?        @default(false)
-  created_at             DateTime        @default(now()) @db.Timestamp(0)
+  verified               Boolean                 @default(false)
+  created_at             DateTime                 @default(now()) @db.Timestamp(0)
   vacancies              vacancies[]
+  experience_validations experience_validations[]
+  company_employees      company_employees[]
 }
 
 model company_employees {
@@ -45,53 +49,46 @@ model company_employees {
   employment_type company_employees_employment_type
   hired_at        DateTime                          @default(now()) @db.Timestamp(0)
   users           users                             @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "company_employees_ibfk_1")
+  companies       companies                         @relation(fields: [company_id], references: [id])
 
   @@index([user_id], map: "user_id")
 }
 
 model educations {
   id          Int       @id @default(autoincrement())
+  user_id     Int
   name        String    @db.VarChar(80)
   description String    @db.VarChar(200)
   start_date  DateTime  @db.Date
-  end_date    DateTime? @db.Date
-}
+  end_date    DateTime?
+  users       users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-model experience_skill_validations {
-  id                     Int                    @id @default(autoincrement())
-  skill_id               Int
-  validation_id          Int
-  experience_skills      experience_skills      @relation(fields: [skill_id], references: [id], onDelete: Cascade, map: "experience_skill_validations_ibfk_1")
-  experience_validations experience_validations @relation(fields: [validation_id], references: [id], onDelete: Cascade, map: "experience_skill_validations_ibfk_2")
-
-  @@index([skill_id], map: "skill_id")
-  @@index([validation_id], map: "validation_id")
+  @@index([user_id])
 }
 
 model experience_skills {
-  id                           Int                            @id @default(autoincrement())
-  experience_id                Int
-  name                         String                         @db.VarChar(40)
-  level                        String                         @db.VarChar(20)
-  added_at                     DateTime                       @default(now()) @db.Timestamp(0)
-  experience_skill_validations experience_skill_validations[]
-  experiences                  experiences                    @relation(fields: [experience_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "experience_skills_ibfk_1")
-  experience_validations       experience_validations[]
+  id                     Int                      @id @default(autoincrement())
+  experience_id          Int
+  name                   String                   @db.VarChar(40)
+  level                  String                   @db.VarChar(20)
+  added_at               DateTime                 @default(now()) @db.Timestamp(0)
+  experiences            experiences              @relation(fields: [experience_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "experience_skills_ibfk_1")
+  experience_validations experience_validations[]
 
   @@index([experience_id], map: "experience_id")
 }
 
 model experience_validations {
-  id                           Int                            @id @default(autoincrement())
-  validator_id                 Int
-  skill_id                     Int
-  created_at                   DateTime                       @default(now()) @db.Timestamp(0)
-  experience_skill_validations experience_skill_validations[]
-  users                        users                          @relation(fields: [validator_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "experience_validations_ibfk_1")
-  experience_skills            experience_skills              @relation(fields: [skill_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "experience_validations_ibfk_2")
+  id         Int      @id @default(autoincrement())
+  company_id Int
+  skill_id   Int
+  created_at DateTime @default(now()) @db.Timestamp(0)
 
-  @@index([skill_id], map: "skill_id")
-  @@index([validator_id], map: "validator_id")
+  experience_skills experience_skills @relation(fields: [skill_id], references: [id], onDelete: Cascade, onUpdate: Restrict)
+  companies         companies         @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@index([skill_id])
+  @@index([company_id])
 }
 
 model experiences {
@@ -102,7 +99,7 @@ model experiences {
   description       String?             @db.Text
   start_date        DateTime            @db.Date
   end_date          DateTime?           @db.Date
-  current           Boolean?            @default(false)
+  current           Boolean            @default(false)
   experience_skills experience_skills[]
   users             users               @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "experiences_ibfk_1")
 
@@ -173,7 +170,7 @@ model posts {
   id            Int             @id @default(autoincrement())
   user_id       Int
   content       String?         @db.Text
-  visible       Boolean?        @default(true)
+  visible       Boolean        @default(true)
   created_at    DateTime        @default(now()) @db.Timestamp(0)
   post_comments post_comments[]
   post_likes    post_likes[]
@@ -195,29 +192,28 @@ model user_skills {
 }
 
 model users {
-  id                                      Int                      @id @default(autoincrement())
-  name                                    String                   @db.VarChar(100)
-  username                                String                   @db.VarChar(40)
-  email                                   String                   @unique(map: "email") @db.VarChar(100)
-  password                                String                   @db.VarChar(255)
-  phone                                   String?                  @db.VarChar(20)
-  birth_date                              DateTime?                @db.Date
-  country                                 String?                  @db.VarChar(40)
-  state                                   String?                  @db.VarChar(40)
-  city                                    String?                  @db.VarChar(80)
-  profession                              String                   @db.VarChar(40)
-  bio                                     String?                  @db.VarChar(200)
-  about                                   String?                  @db.Text
-  website                                 String?                  @db.VarChar(200)
-  avatar                                  String                   @default("default.jpg") @db.VarChar(200)
-  cover                                   String                   @default("default.jpg") @db.VarChar(200)
-  verified                                Boolean?                 @default(false)
-  created_at                              DateTime                 @default(now()) @db.Timestamp(0)
+  id                                      Int                 @id @default(autoincrement())
+  name                                    String              @db.VarChar(100)
+  username                                String              @unique @db.VarChar(40)
+  email                                   String              @unique(map: "email") @db.VarChar(100)
+  password                                String              @db.VarChar(255)
+  phone                                   String?             @db.VarChar(20)
+  birth_date                              DateTime?           @db.Date
+  country                                 String?             @db.VarChar(40)
+  state                                   String?             @db.VarChar(40)
+  city                                    String?             @db.VarChar(80)
+  profession                              String              @db.VarChar(40)
+  bio                                     String?             @db.VarChar(200)
+  about                                   String?             @db.Text
+  website                                 String?             @db.VarChar(200)
+  avatar                                  String              @default("default.jpg") @db.VarChar(200)
+  cover                                   String              @default("default.jpg") @db.VarChar(200)
+  verified                                Boolean            @default(false)
+  created_at                              DateTime            @default(now()) @db.Timestamp(0)
   company_employees                       company_employees[]
-  experience_validations                  experience_validations[]
   experiences                             experiences[]
-  following_following_follower_idTousers  following[]              @relation("following_follower_idTousers")
-  following_following_following_idTousers following[]              @relation("following_following_idTousers")
+  following_following_follower_idTousers  following[]         @relation("following_follower_idTousers")
+  following_following_following_idTousers following[]         @relation("following_following_idTousers")
   post_comments                           post_comments[]
   post_likes                              post_likes[]
   post_media                              post_media[]
@@ -225,6 +221,7 @@ model users {
   posts                                   posts[]
   user_skills                             user_skills[]
   vacancies                               vacancies[]
+  educations                              educations[]
 }
 
 model vacancies {
@@ -240,7 +237,7 @@ model vacancies {
   job_type         vacancies_job_type
   location         vacancies_location
   published_at     DateTime                   @default(now()) @db.Timestamp(0)
-  active           Boolean?                   @default(true)
+  active           Boolean                   @default(true)
   companies        companies                  @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "vacancies_ibfk_1")
   users            users?                     @relation(fields: [user_posted_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "vacancies_ibfk_2")
 
@@ -256,6 +253,7 @@ enum post_media_media_type {
 
 enum company_employees_employment_type {
   full_time
+  part_time
   intern
   contractor
   partner

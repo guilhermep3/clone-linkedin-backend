@@ -48,3 +48,35 @@ export const getUserPostsCount = async (id: number) => {
 
   return postsCount;
 }
+
+export const findUserExperiences = async (id: number) => {
+  const experiences = await prisma.experiences.findMany({
+    where: { user_id: id },
+    include: {
+      experience_skills: {
+        select: {
+          id: true,
+          name: true,
+          level: true,
+          experience_validations: {
+            select: {
+              id: true,
+              company_id: true,
+              companies: {
+                select: {
+                  id: true,
+                  name: true,
+                  username: true,
+                  avatar: true,
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    orderBy: { start_date: 'desc' }
+  })
+
+  return experiences;
+};

@@ -6,7 +6,7 @@ export const userRoutes = Router();
 
 userRoutes.get('/:username', verifyJWT, userController.getUser);
 userRoutes.get('/:username/post', verifyJWT, userController.getUserPosts);
-// userRoutes.get('/:username/experience', verifyJWT, userController.getUserExperiences);
+userRoutes.get('/:username/experience', verifyJWT, userController.getUserExperiences);
 // userRoutes.get('/:username/competence', verifyJWT, userController.getUserCompetences);
 // userRoutes.get('/:username/certificate', verifyJWT, userController.getUserCertificates);
 // userRoutes.get('/:username/formation', verifyJWT, userController.getUserFormations);
