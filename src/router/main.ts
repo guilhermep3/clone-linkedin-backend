@@ -27,4 +27,4 @@ mainRouter.use('/companies', companyRoutes);
 // mainRouter.get('/feed', verifyJWT, feedController.getFeed);
 // mainRouter.get('/search', verifyJWT, searchController.searchPosts);
 // mainRouter.get('/trendings', verifyJWT, trendController.getTrends);
-// mainRouter.get('/suggestion', verifyJWT, suggestionController.getSuggestions);
+// mainRouter.get('/suggestions', verifyJWT, suggestionController.getSuggestions);
