@@ -2,9 +2,10 @@ import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import type { ExtendedRequest } from "../type/extendedRequest.js";
 import { findUserByUsername } from "../services/user.js";
+import { findCompanyByUsername } from "../services/company.js";
 
-export const createJWT = (username: string) => {
-  return jwt.sign({ username }, process.env.JWT_SECRET as string)
+export const createJWT = (username: string, accountType: 'user' | 'company') => {
+  return jwt.sign({ username, accountType }, process.env.JWT_SECRET as string)
 }
 
 export const verifyJWT = (req: ExtendedRequest, res: Response, next: NextFunction) => {
@@ -14,7 +15,7 @@ export const verifyJWT = (req: ExtendedRequest, res: Response, next: NextFunctio
   const authorization = req.headers['authorization'];
 
   if (!authorization) {
-    res.status(401).json({ error: 'Acesso negado' });
+    res.status(401).json({ error: 'Acesso negado 1' });
     return;
   }
 
@@ -25,17 +26,26 @@ export const verifyJWT = (req: ExtendedRequest, res: Response, next: NextFunctio
     process.env.JWT_SECRET as string,
     async (error, decoded: any) => {
       if (error) {
-        res.status(401).json({ error: 'Acesso negado' });
+        res.status(401).json({ error: 'Acesso negado 2', details: error });
         return;
       }
 
-      const user = await findUserByUsername(decoded.username);
-      if(!user){
+      const { username, accountType } = decoded;
+
+      let account = null;
+      if (accountType === 'user') {
+        account = await findUserByUsername(username);
+      } else if (accountType === 'company') {
+        account = await findCompanyByUsername(username);
+      }
+
+      if (!account) {
         res.status(401).json({ error: 'Acesso negado 3' });
         return;
       }
 
-      req.userLogged = decoded.username;
+      req.usernameLogged = username;
+      req.accountType = accountType;
       next();
     }
   )

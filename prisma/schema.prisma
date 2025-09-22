@@ -13,7 +13,10 @@ model certificates {
   name       String    @db.VarChar(80)
   issuer     String    @db.VarChar(80)
   issue_date DateTime? @db.Date
+  user_id    Int
+  image      String?
   credential String    @db.VarChar(200)
+  users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model companies {
@@ -34,11 +37,13 @@ model companies {
   cover                  String                   @default("default.jpg") @db.VarChar(200)
   presentation_video_url String?                  @db.VarChar(400)
   size                   companies_size?
-  verified               Boolean                 @default(false)
+  type                   companyType              @default(Company)
+  verified               Boolean                  @default(false)
   created_at             DateTime                 @default(now()) @db.Timestamp(0)
   vacancies              vacancies[]
   experience_validations experience_validations[]
   company_employees      company_employees[]
+  experiences            experiences[]
 }
 
 model company_employees {
@@ -55,27 +60,33 @@ model company_employees {
 }
 
 model educations {
-  id          Int       @id @default(autoincrement())
-  user_id     Int
-  name        String    @db.VarChar(80)
-  description String    @db.VarChar(200)
-  start_date  DateTime  @db.Date
-  end_date    DateTime?
-  users       users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id             Int       @id @default(autoincrement())
+  user_id        Int
+  institution    String    @db.VarChar(80)
+  diploma        String    @db.VarChar(80)
+  field_of_study String    @db.VarChar(80)
+  grade          String?   @db.VarChar(20)
+  description    String    @db.VarChar(255)
+  start_date     DateTime  @db.Date
+  end_date       DateTime? @db.Date
+  current        Boolean   @default(false)
+  users          users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
 }
 
 model experience_skills {
-  id                     Int                      @id @default(autoincrement())
-  experience_id          Int
-  name                   String                   @db.VarChar(40)
-  level                  String                   @db.VarChar(20)
-  added_at               DateTime                 @default(now()) @db.Timestamp(0)
-  experiences            experiences              @relation(fields: [experience_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "experience_skills_ibfk_1")
+  id            Int      @id @default(autoincrement())
+  experience_id Int
+  user_skill_id Int
+  added_at      DateTime @default(now()) @db.Timestamp(0)
+
+  experiences            experiences              @relation(fields: [experience_id], references: [id], onDelete: Cascade)
+  user_skills            user_skills              @relation(fields: [user_skill_id], references: [id], onDelete: Cascade)
   experience_validations experience_validations[]
 
-  @@index([experience_id], map: "experience_id")
+  @@index([experience_id])
+  @@index([user_skill_id])
 }
 
 model experience_validations {
@@ -94,14 +105,15 @@ model experience_validations {
 model experiences {
   id                Int                 @id @default(autoincrement())
   user_id           Int
-  name              String              @db.VarChar(60)
+  company_id        Int
   role              String              @db.VarChar(100)
   description       String?             @db.Text
   start_date        DateTime            @db.Date
   end_date          DateTime?           @db.Date
-  current           Boolean            @default(false)
+  current           Boolean             @default(false)
   experience_skills experience_skills[]
   users             users               @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "experiences_ibfk_1")
+  company           companies           @relation(fields: [company_id], references: [id], onUpdate: Restrict)
 
   @@index([user_id], map: "user_id")
 }
@@ -170,7 +182,7 @@ model posts {
   id            Int             @id @default(autoincrement())
   user_id       Int
   content       String?         @db.Text
-  visible       Boolean        @default(true)
+  visible       Boolean         @default(true)
   created_at    DateTime        @default(now()) @db.Timestamp(0)
   post_comments post_comments[]
   post_likes    post_likes[]
@@ -181,12 +193,13 @@ model posts {
 }
 
 model user_skills {
-  id         Int      @id @default(autoincrement())
-  user_id    Int
-  name       String   @db.VarChar(40)
-  level      String   @db.VarChar(20)
-  created_at DateTime @default(now()) @db.Timestamp(0)
-  users      users    @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "user_skills_ibfk_1")
+  id                Int                 @id @default(autoincrement())
+  user_id           Int
+  name              String              @db.VarChar(40)
+  level             String              @db.VarChar(20)
+  created_at        DateTime            @default(now()) @db.Timestamp(0)
+  users             users               @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "user_skills_ibfk_1")
+  experience_skills experience_skills[]
 
   @@index([user_id], map: "user_id")
 }
@@ -208,7 +221,7 @@ model users {
   website                                 String?             @db.VarChar(200)
   avatar                                  String              @default("default.jpg") @db.VarChar(200)
   cover                                   String              @default("default.jpg") @db.VarChar(200)
-  verified                                Boolean            @default(false)
+  verified                                Boolean             @default(false)
   created_at                              DateTime            @default(now()) @db.Timestamp(0)
   company_employees                       company_employees[]
   experiences                             experiences[]
@@ -222,6 +235,7 @@ model users {
   user_skills                             user_skills[]
   vacancies                               vacancies[]
   educations                              educations[]
+  certificates                            certificates[]
 }
 
 model vacancies {
@@ -237,7 +251,7 @@ model vacancies {
   job_type         vacancies_job_type
   location         vacancies_location
   published_at     DateTime                   @default(now()) @db.Timestamp(0)
-  active           Boolean                   @default(true)
+  active           Boolean                    @default(true)
   companies        companies                  @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "vacancies_ibfk_1")
   users            users?                     @relation(fields: [user_posted_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "vacancies_ibfk_2")
 
@@ -246,17 +260,22 @@ model vacancies {
 }
 
 enum post_media_media_type {
-  image
-  video
-  file
+  Image
+  Video
+  File
+}
+
+enum companyType {
+  Institution
+  Company
 }
 
 enum company_employees_employment_type {
-  full_time
-  part_time
-  intern
-  contractor
-  partner
+  Full_time
+  Part_time
+  Intern
+  Contractor
+  Partner
 }
 
 enum vacancies_experience_level {
@@ -284,7 +303,7 @@ enum vacancies_location {
 }
 
 enum companies_size {
-  small
-  medium
-  large
+  Small
+  Medium
+  Large
 }

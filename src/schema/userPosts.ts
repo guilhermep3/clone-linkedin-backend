@@ -1,5 +1,5 @@
 import z from "zod";
 
-export const userPostsSchema = z.object({
+export const pageSchema = z.object({
   page: z.coerce.number().min(0).optional()
 })

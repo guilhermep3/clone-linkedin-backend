@@ -1,16 +1,5 @@
 import z from "zod";
-
-/**
- * Pré-processador para aceitar data enviada como string (ex: "1990-01-01")
- * e transformar em Date, ou aceitar undefined/null.
- */
-const parseOptionalDate = z.preprocess((arg) => {
-  if (typeof arg === "string" && arg.trim() !== "") {
-    const d = new Date(arg);
-    return isNaN(d.getTime()) ? arg : d;
-  }
-  return undefined;
-}, z.date().optional());
+import { parseOptionalDate } from "../utils/parseDate.js";
 
 export const signupSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório").max(100, "Nome deve ter no máximo 100 caracteres"),

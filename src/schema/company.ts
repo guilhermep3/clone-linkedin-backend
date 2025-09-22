@@ -1,0 +1,21 @@
+import z from "zod";
+
+export const companySchema = z.object({
+  name: z.string({ message: 'Nome é obrigatório' }).max(100, 'Máximo 100 caracteres'),
+  username: z.string({ message: 'Username é obrigatório' }).max(40, 'Máximo 40 caracteres'),
+  email: z.string({ message: 'Email é obrigatório' }).email('Email inválido').max(100, 'Máximo 100 caracteres'),
+  password: z.string({ message: 'Senha é obrigatória' }).max(255, 'Máximo 255 caracteres'),
+  phone: z.string().max(20, 'Máximo 20 caracteres').optional(),
+  country: z.string().max(40, 'Máximo 40 caracteres').optional(),
+  state: z.string().max(40, 'Máximo 40 caracteres').optional(),
+  city: z.string().max(80, 'Máximo 80 caracteres').optional(),
+  industry: z.string({ message: 'Setor é obrigatório' }).max(40, 'Máximo 40 caracteres'),
+  bio: z.string().max(200, 'Máximo 200 caracteres').optional(),
+  about: z.string().optional(),
+  website: z.string().url('URL inválida').max(200, 'Máximo 200 caracteres').optional(),
+  avatar: z.string().max(200, 'Máximo 200 caracteres').default("default.jpg"),
+  cover: z.string().max(200, 'Máximo 200 caracteres').default("default.jpg"),
+  presentation_video_url: z.string().url('URL inválida').max(400, 'Máximo 400 caracteres').optional(),
+  size: z.enum(["small", "medium", "large"]).optional(),
+  verified: z.boolean().default(false),
+});

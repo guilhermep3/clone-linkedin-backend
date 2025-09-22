@@ -1,17 +1,31 @@
 import type { Response } from "express";
-import { findUserByUsername, findUserExperiences, getUserFollowersCount, getUserFollowingCount, getUserPostsCount } from "../services/user.js";
+import { findUserByUsername, findUserSkills, findUserExperiences, getUserFollowersCount, getUserFollowingCount, getUserPostsCount, findUserEducations, checkIfFollows, follow, unfollow, findUserCertificates, createExperience, createSkills, findExperienceById, findUserSkillById, createExperienceSkill, createEducation, createCertificate, findUsers } from "../services/user.js";
 import type { ExtendedRequest } from "../type/extendedRequest.js";
-import { userPostsSchema } from "../schema/userPosts.js";
+import { pageSchema } from "../schema/userPosts.js";
 import { findPostsByUser } from "../services/post.js";
+import { experienceSchema, experienceSkillSchema } from "../schema/experience.js";
+import type { Prisma } from "@prisma/client";
+import { findCompanyById } from "../services/company.js";
+import { userSkillSchema } from "../schema/userSkill.js";
+import { educationSchema } from "../schema/education.js";
+import { certificateSchema } from "../schema/certificate.js";
 
-export const getUser = async (req: ExtendedRequest, res: Response) => {
-  const username = req.params.username as string;
-
-  const user = await findUserByUsername(username);
-  if (!user) {
-    res.status(401).json({ error: 'Usuário não encontrado' });
+export const getUsers = async (req: ExtendedRequest, res: Response) => {
+  const safeData = pageSchema.safeParse(req.query);
+  if (!safeData.success) {
+    res.json({ error: safeData.error.flatten().fieldErrors })
     return;
   }
+  let perPage = 10;
+  let currentPage = safeData.data.page ?? 0;
+
+  const users = await findUsers(perPage, currentPage);
+
+  res.json({ users, page: currentPage });
+}
+
+export const getUser = async (req: ExtendedRequest, res: Response) => {
+  const user = req.userFound;
 
   const followingCount = await getUserFollowingCount(user.id);
   const followersCount = await getUserFollowersCount(user.id);
@@ -21,21 +35,15 @@ export const getUser = async (req: ExtendedRequest, res: Response) => {
 }
 
 export const getUserPosts = async (req: ExtendedRequest, res: Response) => {
-  const username = req.params.username as string;
+  const user = req.userFound;
 
-  const safeData = userPostsSchema.safeParse(req.query);
+  const safeData = pageSchema.safeParse(req.query);
   if (!safeData.success) {
     res.json({ error: safeData.error.flatten().fieldErrors })
     return;
   }
 
-  const user = await findUserByUsername(username);
-  if (!user) {
-    res.json({ error: 'Usuário não encontrado' });
-    return;
-  }
-
-  let currentPage = 0;
+  let currentPage = safeData.data.page ?? 0;
   let perPage = 10;
 
   const posts = await findPostsByUser(user.id, currentPage, perPage);
@@ -48,15 +56,176 @@ export const getUserPosts = async (req: ExtendedRequest, res: Response) => {
 }
 
 export const getUserExperiences = async (req: ExtendedRequest, res: Response) => {
-  const username = req.params.username as string;
+  const user = req.userFound;
 
-  const user = await findUserByUsername(username);
+  const experiences = await findUserExperiences(user.id);
+
+  res.json({ experiences });
+}
+
+export const getUserSkills = async (req: ExtendedRequest, res: Response) => {
+  const user = req.userFound;
+
+  const skills = await findUserSkills(user.id);
+
+  res.json({ skills });
+}
+
+export const getUserEducations = async (req: ExtendedRequest, res: Response) => {
+  const user = req.userFound;
+
+  const educations = await findUserEducations(user.id);
+
+  res.json({ educations });
+}
+
+export const getUserCertificates = async (req: ExtendedRequest, res: Response) => {
+  const user = req.userFound;
+
+  const certificates = await findUserCertificates(user.id);
+
+  res.json({ certificates });
+}
+
+export const followToggle = async (req: ExtendedRequest, res: Response) => {
+  const usernameLogged = req.usernameLogged as string;
+
+  const user = await findUserByUsername(usernameLogged);
   if (!user) {
     res.status(404).json({ error: 'Usuário não encontrado' });
     return;
   }
 
-  const experiences = await findUserExperiences(user.id);
+  const username = await findUserByUsername(req.params.username as string);
+  if (!username) {
+    res.status(404).json({ error: 'Usuário não encontrado' });
+    return;
+  }
 
-  res.json({ experiences });
+  const follows = await checkIfFollows(username.id, user.id);
+  if (!follows) {
+    await follow(username.id, user.id);
+    res.json({ following: true });
+  } else {
+    await unfollow(username.id, user.id);
+    res.json({ following: false });
+  }
+}
+
+export const addSkills = async (req: ExtendedRequest, res: Response) => {
+  const safeData = userSkillSchema.safeParse(req.body);
+  if (!safeData.success) {
+    res.json({ error: safeData.error.flatten().fieldErrors });
+    return;
+  }
+
+  const user = await findUserByUsername(req.usernameLogged as string);
+  if (!user) {
+    res.status(404).json({ error: 'Usuário não encontrado' });
+    return;
+  }
+
+  const newSkills = await createSkills(
+    safeData.data.name, safeData.data.level, user.id
+  );
+
+  res.json({ newSkills });
+}
+
+
+export const addExperience = async (req: ExtendedRequest, res: Response) => {
+  const safeData = experienceSchema.safeParse(req.body);
+  if (!safeData.success) {
+    res.json({ error: safeData.error.flatten().fieldErrors });
+    return;
+  }
+
+  const user = await findUserByUsername(req.usernameLogged as string);
+  if (!user) {
+    res.status(404).json({ error: 'Usuário não encontrado' });
+    return;
+  }
+
+  const hasCompany = await findCompanyById(safeData.data.company_id);
+  if (!hasCompany) {
+    res.json({ error: 'Empresa não encontrada' });
+    return;
+  }
+
+  const experienceData = {
+    ...safeData.data,
+    user_id: user.id
+  }
+
+  const newExperience = await createExperience(experienceData as unknown as Prisma.experiencesCreateInput);
+
+  res.json({ newExperience });
+}
+
+export const addExperienceSkill = async (req: ExtendedRequest, res: Response) => {
+  const safeData = experienceSkillSchema.safeParse(req.body);
+  if (!safeData.success) {
+    res.status(400).json({ error: safeData.error.flatten().fieldErrors });
+    return;
+  }
+
+  const hasExperience = await findExperienceById(safeData.data.experience_id);
+  if (!hasExperience) {
+    res.status(404).json({ error: 'Experiência não encontrada' });
+    return;
+  }
+
+  const hasUserSkill = await findUserSkillById(safeData.data.user_skill_id);
+  if (!hasUserSkill) {
+    res.status(404).json({ error: 'Competência não encontrada' });
+    return;
+  }
+
+  const newExperienceSkill = await createExperienceSkill(
+    safeData.data.experience_id,
+    safeData.data.user_skill_id
+  );
+
+  res.json({ newExperienceSkill });
+}
+
+export const addEducation = async (req: ExtendedRequest, res: Response) => {
+  const safeData = educationSchema.safeParse(req.body);
+  if (!safeData.success) {
+    res.status(400).json({ error: safeData.error.flatten().fieldErrors });
+    return;
+  }
+
+  const user = await findUserByUsername(req.usernameLogged as string);
+  if (!user) {
+    res.status(404).json({ error: 'Usuário não encontrado' });
+    return;
+  }
+
+  const educationData = {
+    ...safeData.data,
+    user_id: user.id
+  }
+
+  const newEducation = await createEducation(educationData as unknown as Prisma.educationsCreateInput);
+
+  res.json({ newEducation });
+}
+
+export const addCertificate = async (req: ExtendedRequest, res: Response) => {
+  const safeData = certificateSchema.safeParse(req.body);
+  if (!safeData.success) {
+    res.status(400).json({ error: safeData.error.flatten().fieldErrors });
+    return;
+  }
+
+  const user = await findUserByUsername(req.usernameLogged as string);
+  if (!user) {
+    res.status(404).json({ error: 'Usuário não encontrado' });
+    return;
+  }
+
+  const newEducation = await createCertificate(safeData.data as Prisma.certificatesCreateInput);
+
+  res.json({ newEducation });
 }

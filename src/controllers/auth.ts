@@ -2,6 +2,7 @@ import type { Response } from "express";
 import { signinSchema, signupSchema } from "../schema/auth.js"
 import type { ExtendedRequest } from "../type/extendedRequest.js";
 import { createUser, findUserByEmail, findUserByUsername } from "../services/user.js";
+import { findCompanyByEmail } from "../services/company.js"
 import slug from "slug";
 import { compare, hash } from "bcrypt-ts";
 import { Prisma } from "@prisma/client";
@@ -52,25 +53,32 @@ export const signin = async (req: ExtendedRequest, res: Response) => {
     return;
   }
 
-  const user = await findUserByEmail(safeData.data.email);
-  if (!user) {
-    res.json({ error: 'Acesso negado' });
+  let account: any = await findUserByEmail(safeData.data.email);
+  let accountType: 'user' | 'company' = 'user';
+
+  if (!account) {
+    account = await findCompanyByEmail(safeData.data.email);
+    accountType = 'company';
+  }
+
+  if (!account) {
+    res.status(400).json({ error: 'Acesso negado' });
     return;
   }
 
-  const verifyPass = await compare(safeData.data.password, user.password);
+  const verifyPass = await compare(safeData.data.password, account.password);
   if (!verifyPass) {
     res.status(401).json({ error: 'Acesso negado' });
     return;
   }
 
-  const token = await createJWT(user.username);
+  const token = await createJWT(account.username, accountType);
 
   res.json({
     token,
     user: {
-      username: user.username,
-      avatar: user.avatar
+      username: account.username,
+      avatar: account.avatar
     }
   });
 }

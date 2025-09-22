@@ -1,5 +1,7 @@
 import type { Request } from "express";
 
 export type ExtendedRequest = Request & {
-  userLogged?: string;
+  usernameLogged?: string;
+  userFound?: any;
+  accountType?: string
 }

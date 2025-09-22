@@ -4,7 +4,7 @@ import { verifyJWT } from "../utils/jwt.js";
 
 export const vacancieRoutes = Router();
 
-// vacancieRoutes.post('/', verifyJWT, vacancieController.createVacancie);
+// vacancieRoutes.post('/', verifyJWT, vacancieController.addVacancie);
 // vacancieRoutes.get('/', verifyJWT, vacancieController.getVacancie);
 // vacancieRoutes.get('/:id', verifyJWT, vacancieController.getVacancie);
 // vacancieRoutes.put('/:id', verifyJWT, vacancieController.updateVacancie);
