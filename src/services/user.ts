@@ -196,9 +196,88 @@ export const createEducation = async (data: Prisma.educationsCreateInput) => {
 }
 
 export const createCertificate = async (data: Prisma.certificatesCreateInput) => {
-  const newCertificate = await prisma.certificates.create({
-    data
-  })
+  const newCertificate = await prisma.certificates.create({ data })
 
   return newCertificate;
+}
+
+export const updateUserByUsername = async (data: Prisma.usersUpdateInput, username: string) => {
+  const userUpdated = await prisma.users.update({
+    data,
+    where: { username }
+  })
+
+  return userUpdated;
+}
+
+export const updateExperienceById = async (data: Prisma.experiencesUpdateInput, id: number) => {
+  const experienceUpdated = await prisma.experiences.update({
+    data,
+    where: { id: id as number }
+  })
+
+  return experienceUpdated;
+}
+
+export const updateUserSkillsById = async (data: Prisma.user_skillsUpdateInput, id: number) => {
+  const userSkillUpdated = await prisma.user_skills.update({
+    data,
+    where: { id }
+  })
+
+  return userSkillUpdated;
+}
+
+export const updateEducationById = async (data: Prisma.user_skillsUpdateInput, id: number) => {
+  const userSkillUpdated = await prisma.educations.update({
+    data,
+    where: { id }
+  })
+
+  return userSkillUpdated;
+}
+
+export const updateCertificateById = async (data: Prisma.user_skillsUpdateInput, id: number) => {
+  const userSkillUpdated = await prisma.certificates.update({
+    data,
+    where: { id }
+  })
+
+  return userSkillUpdated;
+}
+
+export const deleteUserById = async (id: number) => {
+  await prisma.users.delete({
+    where: { id }
+  })
+}
+
+export const deleteUserSkillById = async (id: number) => {
+  await prisma.user_skills.delete({
+    where: { id }
+  })
+}
+
+export const deleteExperienceById = async (id: number) => {
+  await prisma.experiences.delete({
+    where: { id }
+  })
+}
+
+export const deleteExperienceSkillById = async (id: number) => {
+  await prisma.experience_skills.delete({
+    where: { id }
+  })
+}
+
+export const deleteEducationById = async (id: number) => {
+  await prisma.experience_skills.delete({
+    where: { id }
+  })
+}
+
+export const deleteCertificateById = async (id: number) => {
+  await prisma.experience_skills.delete({
+    where: { id }
+  })
 }

@@ -1,14 +1,32 @@
 import type { Response } from "express";
-import { findUserByUsername, findUserSkills, findUserExperiences, getUserFollowersCount, getUserFollowingCount, getUserPostsCount, findUserEducations, checkIfFollows, follow, unfollow, findUserCertificates, createExperience, createSkills, findExperienceById, findUserSkillById, createExperienceSkill, createEducation, createCertificate, findUsers } from "../services/user.js";
+import {
+  findUserByUsername, findUserSkills, findUserExperiences, getUserFollowersCount,
+  getUserFollowingCount, getUserPostsCount, findUserEducations, checkIfFollows,
+  follow, unfollow, findUserCertificates, createExperience,
+  createSkills, findExperienceById, findUserSkillById, createExperienceSkill,
+  createEducation, createCertificate, findUsers, updateUserByUsername,
+  updateExperienceById,
+  updateUserSkillsById,
+  updateEducationById,
+  deleteUserById,
+  deleteUserSkillById,
+  deleteExperienceById,
+  deleteExperienceSkillById,
+  deleteEducationById,
+  deleteCertificateById,
+  updateCertificateById
+} from "../services/user.js";
 import type { ExtendedRequest } from "../type/extendedRequest.js";
 import { pageSchema } from "../schema/userPosts.js";
 import { findPostsByUser } from "../services/post.js";
-import { experienceSchema, experienceSkillSchema } from "../schema/experience.js";
+import { experienceSchema, experienceSkillSchema, updateExperienceSchema } from "../schema/experience.js";
 import type { Prisma } from "@prisma/client";
 import { findCompanyById } from "../services/company.js";
-import { userSkillSchema } from "../schema/userSkill.js";
-import { educationSchema } from "../schema/education.js";
-import { certificateSchema } from "../schema/certificate.js";
+import { updateUserSkillSchema, userSkillSchema } from "../schema/userSkill.js";
+import { educationSchema, updateEducationSchema } from "../schema/education.js";
+import { certificateSchema, updateCertificateSchema } from "../schema/certificate.js";
+import { updateUserSchema } from "../schema/updateUser.js";
+import { createJWT } from "../utils/jwt.js";
 
 export const getUsers = async (req: ExtendedRequest, res: Response) => {
   const safeData = pageSchema.safeParse(req.query);
@@ -225,7 +243,168 @@ export const addCertificate = async (req: ExtendedRequest, res: Response) => {
     return;
   }
 
-  const newEducation = await createCertificate(safeData.data as Prisma.certificatesCreateInput);
+  const certificateData = {
+    ...safeData.data,
+    user_id: user.id
+  }
+
+  const newEducation = await createCertificate(certificateData as unknown as Prisma.certificatesCreateInput);
 
   res.json({ newEducation });
+}
+
+export const updateUser = async (req: ExtendedRequest, res: Response) => {
+  const safeData = updateUserSchema.safeParse(req.body);
+  if (!safeData.success) {
+    res.status(400).json({ error: safeData.error.flatten().fieldErrors });
+    return;
+  }
+
+  if (req.body.username && req.body.username !== req.usernameLogged) {
+    const newToken = createJWT(req.body.username, req.accountType! as 'user' | 'company');
+    return res.json({ message: "Username atualizado", token: newToken });
+  }
+
+  const userUpdated = await updateUserByUsername(
+    safeData.data as Prisma.usersUpdateInput,
+    req.usernameLogged as string
+  );
+
+  res.json({ userUpdated })
+}
+
+export const updateExperience = async (req: ExtendedRequest, res: Response) => {
+  const id = parseInt(req.params.id as string);
+
+  const safeData = updateExperienceSchema.safeParse(req.body);
+  if (!safeData.success) {
+    res.status(400).json({ error: safeData.error.flatten().fieldErrors });
+    return;
+  }
+
+  const experienceUpdated = await updateExperienceById(
+    safeData.data as Prisma.experiencesUpdateInput, id as number
+  )
+
+  res.json({ experienceUpdated })
+}
+
+export const updateUserSkills = async (req: ExtendedRequest, res: Response) => {
+  const id = parseInt(req.params.id as string);
+
+  const safeData = updateUserSkillSchema.safeParse(req.body);
+  if (!safeData.success) {
+    res.status(400).json({ error: safeData.error.flatten().fieldErrors });
+    return;
+  }
+
+  const userSkillsUpdated = await updateUserSkillsById(
+    safeData.data as Prisma.user_skillsUpdateInput, id
+  )
+
+  res.json({ userSkillsUpdated })
+}
+
+export const updateEducation = async (req: ExtendedRequest, res: Response) => {
+  const id = parseInt(req.params.id as string);
+
+  const safeData = updateEducationSchema.safeParse(req.body);
+  if (!safeData.success) {
+    res.status(400).json({ error: safeData.error.flatten().fieldErrors });
+    return;
+  }
+
+  const educationUpdated = await updateEducationById(
+    safeData.data as Prisma.user_skillsUpdateInput, id
+  )
+
+  res.json({ educationUpdated })
+}
+
+export const updateCertificate = async (req: ExtendedRequest, res: Response) => {
+  const id = parseInt(req.params.id as string);
+
+  const safeData = updateCertificateSchema.safeParse(req.body);
+  if (!safeData.success) {
+    res.status(400).json({ error: safeData.error.flatten().fieldErrors });
+    return;
+  }
+
+  const certificateUpdated = await updateCertificateById(
+    safeData.data as Prisma.user_skillsUpdateInput, id
+  )
+
+  res.json({ certificateUpdated })
+}
+
+export const deleteUser = async (req: ExtendedRequest, res: Response) => {
+  const id = parseInt(req.params.id as string);
+
+  try {
+    await deleteUserById(id);
+
+    res.json({ deleted: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao deletar usuário', errorDetails: error })
+  }
+}
+
+export const deleteUserSkills = async (req: ExtendedRequest, res: Response) => {
+  const id = parseInt(req.params.id as string);
+
+  try {
+    await deleteUserSkillById(id);
+
+    res.json({ deleted: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao deletar competência de usuário', errorDetails: error })
+  }
+}
+
+export const deleteExperience = async (req: ExtendedRequest, res: Response) => {
+  const id = parseInt(req.params.id as string);
+
+  try {
+    await deleteExperienceById(id);
+
+    res.json({ deleted: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao deletar experiência', errorDetails: error })
+  }
+}
+
+export const deleteExperienceSkill = async (req: ExtendedRequest, res: Response) => {
+  const id = parseInt(req.params.id as string);
+
+  try {
+    await deleteExperienceSkillById(id);
+
+    res.json({ deleted: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao deletar competência de experiência', errorDetails: error })
+  }
+}
+
+export const deleteEducation = async (req: ExtendedRequest, res: Response) => {
+  const id = parseInt(req.params.id as string);
+
+  try {
+    await deleteEducationById(id);
+
+    res.json({ deleted: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao deletar educação', errorDetails: error })
+  }
+}
+
+export const deleteCertificate = async (req: ExtendedRequest, res: Response) => {
+  const id = parseInt(req.params.id as string);
+
+  try {
+    await deleteCertificateById(id);
+
+    res.json({ deleted: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao deletar certificado', errorDetails: error })
+  }
 }
