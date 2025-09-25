@@ -21,7 +21,7 @@ import { pageSchema } from "../schema/userPosts.js";
 import { findPostsByUser } from "../services/post.js";
 import { experienceSchema, experienceSkillSchema, updateExperienceSchema } from "../schema/experience.js";
 import type { Prisma } from "@prisma/client";
-import { findCompanyById } from "../services/company.js";
+import { addEmployed, findCompanyById } from "../services/company.js";
 import { updateUserSkillSchema, userSkillSchema } from "../schema/userSkill.js";
 import { educationSchema, updateEducationSchema } from "../schema/education.js";
 import { certificateSchema, updateCertificateSchema } from "../schema/certificate.js";
@@ -164,10 +164,14 @@ export const addExperience = async (req: ExtendedRequest, res: Response) => {
     return;
   }
 
-  const hasCompany = await findCompanyById(safeData.data.company_id);
-  if (!hasCompany) {
+  const company = await findCompanyById(safeData.data.company_id);
+  if (!company) {
     res.json({ error: 'Empresa não encontrada' });
     return;
+  }
+
+  if (safeData.data.current) {
+    await addEmployed(company.id, user.id, safeData.data.role);
   }
 
   const experienceData = {
@@ -260,6 +264,7 @@ export const updateUser = async (req: ExtendedRequest, res: Response) => {
     return;
   }
 
+  // se atualizar o username, cria um novo jwt
   if (req.body.username && req.body.username !== req.usernameLogged) {
     const newToken = createJWT(req.body.username, req.accountType! as 'user' | 'company');
     return res.json({ message: "Username atualizado", token: newToken });

@@ -1,14 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../utils/prisma.js";
 
-type createEducationType = {
-  user_id: number;
-  name: string;
-  description: string;
-  start_date: string;
-  end_date: string;
-}
-
 export const findUsers = async (perPage: number, currentPage: number) => {
   const users = await prisma.users.findMany({
     skip: currentPage * perPage,
@@ -44,7 +36,7 @@ export const createUser = async (data: Prisma.usersCreateInput) => {
 
 export const getUserFollowingCount = async (id: number) => {
   const followingCount = await prisma.following.count({
-    where: { follower_id: id }
+    where: { follower_id: id, follower_type: 'user' }
   })
 
   return followingCount;
@@ -52,7 +44,7 @@ export const getUserFollowingCount = async (id: number) => {
 
 export const getUserFollowersCount = async (id: number) => {
   const followersCount = await prisma.following.count({
-    where: { following_id: id }
+    where: { following_id: id, following_type: 'user' }
   })
 
   return followersCount;
@@ -60,7 +52,7 @@ export const getUserFollowersCount = async (id: number) => {
 
 export const getUserPostsCount = async (id: number) => {
   const postsCount = await prisma.posts.count({
-    where: { user_id: id }
+    where: { owner_id: id, owner_type: 'user' }
   })
 
   return postsCount;

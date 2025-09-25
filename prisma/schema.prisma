@@ -37,7 +37,7 @@ model companies {
   cover                  String                   @default("default.jpg") @db.VarChar(200)
   presentation_video_url String?                  @db.VarChar(400)
   size                   companies_size?
-  type                   companyType              @default(Company)
+  type                   company_type             @default(Company)
   verified               Boolean                  @default(false)
   created_at             DateTime                 @default(now()) @db.Timestamp(0)
   vacancies              vacancies[]
@@ -119,77 +119,80 @@ model experiences {
 }
 
 model following {
-  id                                  Int      @id @default(autoincrement())
-  follower_id                         Int
-  following_id                        Int
-  added_at                            DateTime @default(now()) @db.Timestamp(0)
-  users_following_follower_idTousers  users    @relation("following_follower_idTousers", fields: [follower_id], references: [id], onUpdate: Restrict, map: "following_ibfk_1")
-  users_following_following_idTousers users    @relation("following_following_idTousers", fields: [following_id], references: [id], onUpdate: Restrict, map: "following_ibfk_2")
+  id             Int      @id @default(autoincrement())
+  follower_id    Int
+  follower_type  owner_type @default(user)
+  following_id   Int
+  following_type owner_type @default(user)
+  added_at       DateTime @default(now()) @db.Timestamp(0)
 
-  @@index([follower_id], map: "follower_id")
-  @@index([following_id], map: "following_id")
+  @@index([follower_id, follower_type])
+  @@index([following_id, following_type])
 }
 
 model post_comments {
-  id         Int      @id @default(autoincrement())
-  user_id    Int
+  id         Int        @id @default(autoincrement())
+  owner_id   Int
+  owner_type owner_type @default(user)
   post_id    Int
-  content    String   @db.Text
-  created_at DateTime @default(now()) @db.Timestamp(0)
-  users      users    @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "post_comments_ibfk_1")
-  posts      posts    @relation(fields: [post_id], references: [id], onUpdate: Restrict, map: "post_comments_ibfk_2")
+  content    String     @db.Text
+  created_at DateTime   @default(now()) @db.Timestamp(0)
+  posts      posts      @relation(fields: [post_id], references: [id], onUpdate: Restrict, map: "post_comments_ibfk_2")
 
   @@index([post_id], map: "post_id")
-  @@index([user_id], map: "user_id")
+  @@index([owner_id, owner_type])
 }
 
 model post_likes {
-  id         Int      @id @default(autoincrement())
-  user_id    Int
+  id         Int        @id @default(autoincrement())
+  owner_id   Int
+  owner_type owner_type @default(user)
   post_id    Int
-  created_at DateTime @default(now()) @db.Timestamp(0)
-  users      users    @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "post_likes_ibfk_1")
-  posts      posts    @relation(fields: [post_id], references: [id], onUpdate: Restrict, map: "post_likes_ibfk_2")
+  created_at DateTime   @default(now()) @db.Timestamp(0)
+  posts      posts      @relation(fields: [post_id], references: [id], onUpdate: Restrict)
 
   @@index([post_id], map: "post_id")
-  @@index([user_id], map: "user_id")
+  @@index([owner_id, owner_type])
 }
 
 model post_media {
   id         Int                   @id @default(autoincrement())
-  user_id    Int
+  owner_id   Int
+  owner_type owner_type            @default(user)
+  post_id    Int
   media_url  String                @db.VarChar(255)
   media_type post_media_media_type
   created_at DateTime              @default(now()) @db.Timestamp(0)
-  users      users                 @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "post_media_ibfk_1")
+  posts      posts                 @relation(fields: [post_id], references: [id], onUpdate: Restrict)
 
-  @@index([user_id], map: "user_id")
+  @@index([owner_id, owner_type])
 }
 
 model post_shares {
-  id         Int      @id @default(autoincrement())
-  user_id    Int
+  id         Int        @id @default(autoincrement())
+  owner_id   Int
+  owner_type owner_type @default(user)
   post_id    Int
-  created_at DateTime @default(now()) @db.Timestamp(0)
-  users      users    @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "post_shares_ibfk_1")
-  posts      posts    @relation(fields: [post_id], references: [id], onUpdate: Restrict, map: "post_shares_ibfk_2")
+  created_at DateTime   @default(now()) @db.Timestamp(0)
+  posts      posts      @relation(fields: [post_id], references: [id], onUpdate: Restrict, map: "post_shares_ibfk_2")
 
   @@index([post_id], map: "post_id")
-  @@index([user_id], map: "user_id")
+  @@index([owner_id, owner_type])
 }
 
 model posts {
   id            Int             @id @default(autoincrement())
-  user_id       Int
+  owner_id      Int
+  owner_type    owner_type      @default(user)
   content       String?         @db.Text
   visible       Boolean         @default(true)
   created_at    DateTime        @default(now()) @db.Timestamp(0)
   post_comments post_comments[]
   post_likes    post_likes[]
   post_shares   post_shares[]
-  users         users           @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "posts_ibfk_1")
+  post_media    post_media[]
 
-  @@index([user_id], map: "user_id")
+  @@index([owner_id, owner_type])
 }
 
 model user_skills {
@@ -205,37 +208,31 @@ model user_skills {
 }
 
 model users {
-  id                                      Int                 @id @default(autoincrement())
-  name                                    String              @db.VarChar(100)
-  username                                String              @unique @db.VarChar(40)
-  email                                   String              @unique(map: "email") @db.VarChar(100)
-  password                                String              @db.VarChar(255)
-  phone                                   String?             @db.VarChar(20)
-  birth_date                              DateTime?           @db.Date
-  country                                 String?             @db.VarChar(40)
-  state                                   String?             @db.VarChar(40)
-  city                                    String?             @db.VarChar(80)
-  profession                              String              @db.VarChar(40)
-  bio                                     String?             @db.VarChar(200)
-  about                                   String?             @db.Text
-  website                                 String?             @db.VarChar(200)
-  avatar                                  String              @default("default.jpg") @db.VarChar(200)
-  cover                                   String              @default("default.jpg") @db.VarChar(200)
-  verified                                Boolean             @default(false)
-  created_at                              DateTime            @default(now()) @db.Timestamp(0)
-  company_employees                       company_employees[]
-  experiences                             experiences[]
-  following_following_follower_idTousers  following[]         @relation("following_follower_idTousers")
-  following_following_following_idTousers following[]         @relation("following_following_idTousers")
-  post_comments                           post_comments[]
-  post_likes                              post_likes[]
-  post_media                              post_media[]
-  post_shares                             post_shares[]
-  posts                                   posts[]
-  user_skills                             user_skills[]
-  vacancies                               vacancies[]
-  educations                              educations[]
-  certificates                            certificates[]
+  id                Int                 @id @default(autoincrement())
+  name              String              @db.VarChar(100)
+  username          String              @unique @db.VarChar(40)
+  email             String              @unique(map: "email") @db.VarChar(100)
+  password          String              @db.VarChar(255)
+  phone             String?             @db.VarChar(20)
+  birth_date        DateTime?           @db.Date
+  country           String?             @db.VarChar(40)
+  state             String?             @db.VarChar(40)
+  city              String?             @db.VarChar(80)
+  profession        String              @db.VarChar(40)
+  bio               String?             @db.VarChar(200)
+  about             String?             @db.Text
+  website           String?             @db.VarChar(200)
+  avatar            String              @default("default.jpg") @db.VarChar(200)
+  cover             String              @default("default.jpg") @db.VarChar(200)
+  verified          Boolean             @default(false)
+  created_at        DateTime            @default(now()) @db.Timestamp(0)
+  company_employees company_employees[]
+  experiences       experiences[]
+
+  user_skills  user_skills[]
+  vacancies    vacancies[]
+  educations   educations[]
+  certificates certificates[]
 }
 
 model vacancies {
@@ -247,11 +244,11 @@ model vacancies {
   salary           Decimal?                   @db.Decimal(10, 2)
   user_posted_id   Int?
   company_id       Int
+  published_at     DateTime                   @default(now()) @db.Timestamp(0)
+  active           Boolean                    @default(true)
   experience_level vacancies_experience_level
   job_type         vacancies_job_type
   location         vacancies_location
-  published_at     DateTime                   @default(now()) @db.Timestamp(0)
-  active           Boolean                    @default(true)
   companies        companies                  @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "vacancies_ibfk_1")
   users            users?                     @relation(fields: [user_posted_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "vacancies_ibfk_2")
 
@@ -265,7 +262,13 @@ enum post_media_media_type {
   File
 }
 
-enum companyType {
+enum companies_size {
+  Small
+  Medium
+  Large
+}
+
+enum company_type {
   Institution
   Company
 }
@@ -276,6 +279,11 @@ enum company_employees_employment_type {
   Intern
   Contractor
   Partner
+}
+
+enum owner_type {
+  user
+  company
 }
 
 enum vacancies_experience_level {
@@ -300,10 +308,4 @@ enum vacancies_location {
   Remote
   Hybrid
   On_site @map("On-site")
-}
-
-enum companies_size {
-  Small
-  Medium
-  Large
 }
