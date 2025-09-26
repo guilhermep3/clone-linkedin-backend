@@ -208,16 +208,16 @@ export const checkIfIsShared = async (post_id: number, owner_id: number, owner_t
   return shared ? true : false;
 }
 
-export const share = async (post_id: number, owner_id: number) => {
+export const share = async (post_id: number, owner_id: number, owner_type: ownerType) => {
   const shared = await prisma.post_shares.create({
-    data: { post_id, owner_id }
+    data: { post_id, owner_id, owner_type }
   })
 
   return shared;
 }
-export const unshare = async (post_id: number, owner_id: number) => {
+export const unshare = async (post_id: number, owner_id: number, owner_type: ownerType) => {
   const unshared = await prisma.post_shares.deleteMany({
-    where: { post_id, owner_id }
+    where: { post_id, owner_id, owner_type }
   })
 
   return unshared;
@@ -230,6 +230,21 @@ export const updatePostById = async (data: Prisma.postsUpdateInput, id: number) 
   })
 
   return postUpdated;
+}
+
+export const checkIfIsUserPost = async (id: number, owner_id: number, owner_type: ownerType) => {
+  const isUserPost = await prisma.posts.findFirst({
+    where: { id, owner_id, owner_type }
+  })
+
+  return isUserPost ? true : false;
+}
+export const checkIfIsUserCommentary = async (id: number, owner_id: number, owner_type: ownerType) => {
+  const isUserCommentary = await prisma.post_comments.findFirst({
+    where: { id, owner_id, owner_type }
+  })
+
+  return isUserCommentary ? true : false
 }
 
 export const deletePostById = async (id: number) => {

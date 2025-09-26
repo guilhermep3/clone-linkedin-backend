@@ -2,7 +2,7 @@ import type { Response } from "express";
 import type { ExtendedRequest, ownerType } from "../type/extendedRequest.js";
 import { pageSchema } from "../schema/userPosts.js";
 import {
-  checkIfIsLiked, checkIfIsShared, createCommentary, createPost,
+  checkIfIsLiked, checkIfIsShared, checkIfIsUserCommentary, checkIfIsUserPost, createCommentary, createPost,
   deleteCommentaryById, deletePostById, findPostById, findPostCommentaries,
   findPosts, like, share, unlike, unshare,
   updatePostById
@@ -28,8 +28,9 @@ export const getPost = async (req: ExtendedRequest, res: Response) => {
   const id = parseInt(req.params.id as string);
 
   const post = await findPostById(id);
-  if(!post){
-    res.status(404).json({ error: 'Postagem não encontrada' })
+  if (!post) {
+    res.status(404).json({ error: 'Postagem não encontrada' });
+    return;
   }
 
   res.json({ post });
@@ -38,8 +39,8 @@ export const getPost = async (req: ExtendedRequest, res: Response) => {
 export const getCommentaries = async (req: ExtendedRequest, res: Response) => {
   const id = parseInt(req.params.id as string);
 
-  const hasPost = findPostById(id);
-  if(!hasPost){
+  const hasPost = await findPostById(id);
+  if (!hasPost) {
     res.status(404).json({ error: 'Postagem não encontrada' });
     return;
   }
@@ -127,11 +128,11 @@ export const shareToggle = async (req: ExtendedRequest, res: Response) => {
 
   const isShared = await checkIfIsShared(post_id, user.id, req.accountType as ownerType);
   if (!isShared) {
-    await share(post_id, user.id);
+    await share(post_id, user.id, req.accountType as ownerType);
     res.json({ shared: true });
     return;
   } else {
-    await unshare(post_id, user.id);
+    await unshare(post_id, user.id, req.accountType as ownerType);
     res.json({ shared: false });
     return;
   }
@@ -153,28 +154,43 @@ export const updatePost = async (req: ExtendedRequest, res: Response) => {
 
 export const deletePost = async (req: ExtendedRequest, res: Response) => {
   const id = parseInt(req.params.id as string);
+  const owner_id = req.userFound.id;
+  const owner_type = req.accountType as ownerType;
+
+  const isUserPost = await checkIfIsUserPost(id, owner_id, owner_type);
+  if (!isUserPost) {
+    res.status(400).json({ error: 'A postagem não é do usuario logado' });
+    return;
+  }
 
   try {
     await deletePostById(id);
-
     res.json({ deleted: true });
   } catch (error) {
-    res.status(500).json({ error: 'Erro ao deletar usuário', errorDetails: error })
+    res.status(500).json({ error: 'Erro ao deletar postagem', errorDetails: error })
   }
 }
 
 export const deleteCommentary = async (req: ExtendedRequest, res: Response) => {
   const id = parseInt(req.params.id as string);
   const idcomment = parseInt(req.params.idcomment as string);
+  const owner_id = req.userFound.id;
+  const owner_type = req.accountType as ownerType;
 
   const hasPost = await findPostById(id);
   if (!hasPost) {
     res.status(400).json({ error: 'Postagem não existe' });
     return;
   }
+
+  const isUserCommentary = await checkIfIsUserCommentary(id, owner_id, owner_type);
+  if (!isUserCommentary) {
+    res.status(400).json({ error: 'A postagem não é do usuario logado' });
+    return;
+  }
+
   try {
     await deleteCommentaryById(idcomment);
-
     res.json({ deleted: true });
   } catch (error) {
     res.status(500).json({ error: 'Erro ao deletar comentário', errorDetails: error })

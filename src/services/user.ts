@@ -220,7 +220,7 @@ export const updateUserSkillsById = async (data: Prisma.user_skillsUpdateInput, 
   return userSkillUpdated;
 }
 
-export const updateEducationById = async (data: Prisma.user_skillsUpdateInput, id: number) => {
+export const updateEducationById = async (data: Prisma.educationsUpdateInput, id: number) => {
   const userSkillUpdated = await prisma.educations.update({
     data,
     where: { id }
@@ -229,7 +229,7 @@ export const updateEducationById = async (data: Prisma.user_skillsUpdateInput, i
   return userSkillUpdated;
 }
 
-export const updateCertificateById = async (data: Prisma.user_skillsUpdateInput, id: number) => {
+export const updateCertificateById = async (data: Prisma.certificatesUpdateInput, id: number) => {
   const userSkillUpdated = await prisma.certificates.update({
     data,
     where: { id }
@@ -263,13 +263,13 @@ export const deleteExperienceSkillById = async (id: number) => {
 }
 
 export const deleteEducationById = async (id: number) => {
-  await prisma.experience_skills.delete({
+  await prisma.educations.delete({
     where: { id }
   })
 }
 
 export const deleteCertificateById = async (id: number) => {
-  await prisma.experience_skills.delete({
+  await prisma.certificates.delete({
     where: { id }
   })
 }

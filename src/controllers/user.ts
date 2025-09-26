@@ -31,7 +31,7 @@ import { createJWT } from "../utils/jwt.js";
 export const getUsers = async (req: ExtendedRequest, res: Response) => {
   const safeData = pageSchema.safeParse(req.query);
   if (!safeData.success) {
-    res.json({ error: safeData.error.flatten().fieldErrors })
+    res.status(400).json({ error: safeData.error.flatten().fieldErrors })
     return;
   }
   let perPage = 10;
@@ -57,7 +57,7 @@ export const getUserPosts = async (req: ExtendedRequest, res: Response) => {
 
   const safeData = pageSchema.safeParse(req.query);
   if (!safeData.success) {
-    res.json({ error: safeData.error.flatten().fieldErrors })
+    res.status(400).json({ error: safeData.error.flatten().fieldErrors })
     return;
   }
 
@@ -66,7 +66,7 @@ export const getUserPosts = async (req: ExtendedRequest, res: Response) => {
 
   const posts = await findPostsByUser(user.id, currentPage, perPage);
   if (!posts) {
-    res.json({ error: 'Usuário não tem nenhuma postagem' });
+    res.status(400).json({ error: 'Usuário não tem nenhuma postagem' });
     return;
   }
 
@@ -110,22 +110,22 @@ export const followToggle = async (req: ExtendedRequest, res: Response) => {
 
   const user = await findUserByUsername(usernameLogged);
   if (!user) {
-    res.status(404).json({ error: 'Usuário não encontrado' });
+    res.status(400).json({ error: 'Usuário não encontrado' });
     return;
   }
 
   const username = await findUserByUsername(req.params.username as string);
   if (!username) {
-    res.status(404).json({ error: 'Usuário não encontrado' });
+    res.status(400).json({ error: 'Usuário não encontrado' });
     return;
   }
 
-  const follows = await checkIfFollows(username.id, user.id);
+  const follows = await checkIfFollows(user.id, username.id);
   if (!follows) {
-    await follow(username.id, user.id);
+    await follow(user.id, username.id);
     res.json({ following: true });
   } else {
-    await unfollow(username.id, user.id);
+    await unfollow(user.id, username.id);
     res.json({ following: false });
   }
 }
@@ -133,7 +133,7 @@ export const followToggle = async (req: ExtendedRequest, res: Response) => {
 export const addSkills = async (req: ExtendedRequest, res: Response) => {
   const safeData = userSkillSchema.safeParse(req.body);
   if (!safeData.success) {
-    res.json({ error: safeData.error.flatten().fieldErrors });
+    res.status(400).json({ error: safeData.error.flatten().fieldErrors });
     return;
   }
 
@@ -154,7 +154,7 @@ export const addSkills = async (req: ExtendedRequest, res: Response) => {
 export const addExperience = async (req: ExtendedRequest, res: Response) => {
   const safeData = experienceSchema.safeParse(req.body);
   if (!safeData.success) {
-    res.json({ error: safeData.error.flatten().fieldErrors });
+    res.status(400).json({ error: safeData.error.flatten().fieldErrors });
     return;
   }
 
@@ -166,7 +166,7 @@ export const addExperience = async (req: ExtendedRequest, res: Response) => {
 
   const company = await findCompanyById(safeData.data.company_id);
   if (!company) {
-    res.json({ error: 'Empresa não encontrada' });
+    res.status(404).json({ error: 'Empresa não encontrada' });
     return;
   }
 
@@ -252,9 +252,9 @@ export const addCertificate = async (req: ExtendedRequest, res: Response) => {
     user_id: user.id
   }
 
-  const newEducation = await createCertificate(certificateData as unknown as Prisma.certificatesCreateInput);
+  const newCertificate = await createCertificate(certificateData as unknown as Prisma.certificatesCreateInput);
 
-  res.json({ newEducation });
+  res.json({ newCertificate });
 }
 
 export const updateUser = async (req: ExtendedRequest, res: Response) => {
@@ -320,7 +320,7 @@ export const updateEducation = async (req: ExtendedRequest, res: Response) => {
   }
 
   const educationUpdated = await updateEducationById(
-    safeData.data as Prisma.user_skillsUpdateInput, id
+    safeData.data as Prisma.educationsUpdateInput, id
   )
 
   res.json({ educationUpdated })
@@ -336,7 +336,7 @@ export const updateCertificate = async (req: ExtendedRequest, res: Response) => 
   }
 
   const certificateUpdated = await updateCertificateById(
-    safeData.data as Prisma.user_skillsUpdateInput, id
+    safeData.data as Prisma.certificatesUpdateInput, id
   )
 
   res.json({ certificateUpdated })
