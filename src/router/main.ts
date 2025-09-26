@@ -20,7 +20,7 @@ mainRouter.get('/privateping', verifyJWT, pingController.privateping);
 mainRouter.use('/auth', authRoutes);
 mainRouter.use('/users', userRoutes);
 mainRouter.use('/companies', companyRoutes);
-// mainRouter.use('/posts', postRoutes);
+mainRouter.use('/posts', postRoutes);
 // mainRouter.use('/vacancies', vacancieRoutes);
 
 // mainRouter.get('/notifications', verifyJWT, notificationController.getNotifications);
