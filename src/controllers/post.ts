@@ -9,6 +9,7 @@ import {
 } from "../services/posts.js";
 import { commentarySchema, postSchema, updatePostSchema } from "../schema/post.js";
 import type { Prisma } from "@prisma/client";
+import { createNotification } from "../services/notification.js";
 
 export const getPosts = async (req: ExtendedRequest, res: Response) => {
   const safeData = pageSchema.safeParse(req.query);
@@ -84,6 +85,16 @@ export const addCommentary = async (req: ExtendedRequest, res: Response) => {
     return;
   }
 
+  await createNotification({
+    user_id: hasPost.owner_id,
+    actor_id: user.id as number,
+    actor_type: req.accountType as ownerType,
+    type: "Comment",
+    entity_id: post_id,
+    entity_type: "Post",
+    message: "comentou em sua postagem"
+  });
+
   const newCommentary = await createCommentary(
     safeData.data.content,
     post_id,
@@ -103,6 +114,16 @@ export const likeToggle = async (req: ExtendedRequest, res: Response) => {
     res.status(400).json({ error: 'Postagem não existe' });
     return;
   }
+
+  await createNotification({
+    user_id: hasPost.owner_id,
+    actor_id: user.id as number,
+    actor_type: req.accountType as ownerType,
+    type: "Like",
+    entity_id: post_id,
+    entity_type: "Post",
+    message: "curtiu sua postagem"
+  });
 
   const isLiked = await checkIfIsLiked(post_id, user.id, req.accountType as ownerType);
   if (!isLiked) {
@@ -125,6 +146,16 @@ export const shareToggle = async (req: ExtendedRequest, res: Response) => {
     res.status(400).json({ error: 'Postagem não existe' });
     return;
   }
+
+  await createNotification({
+    user_id: hasPost.owner_id,
+    actor_id: user.id as number,
+    actor_type: req.accountType as ownerType,
+    type: "Like",
+    entity_id: post_id,
+    entity_type: "Post",
+    message: "compartilhou sua postagem"
+  });
 
   const isShared = await checkIfIsShared(post_id, user.id, req.accountType as ownerType);
   if (!isShared) {

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as pingController from "../controllers/ping.js";
-// import * as notificationController from "../controllers/notification.js";
+import * as notificationController from "../controllers/notification.js";
 // import * as feedController from "../controllers/feed.js";
 // import * as searchController from "../controllers/search.js";
 // import * as trendController from "../controllers/trend.js";
@@ -23,7 +23,7 @@ mainRouter.use('/companies', companyRoutes);
 mainRouter.use('/posts', postRoutes);
 mainRouter.use('/vacancies', vacancieRoutes);
 
-// mainRouter.get('/notifications', verifyJWT, notificationController.getNotifications);
+mainRouter.get('/notifications', verifyJWT, notificationController.getNotifications);
 // mainRouter.get('/feed', verifyJWT, feedController.getFeed);
 // mainRouter.get('/search', verifyJWT, searchController.searchPosts);
 // mainRouter.get('/trendings', verifyJWT, trendController.getTrends);

@@ -16,7 +16,7 @@ import {
   deleteCertificateById,
   updateCertificateById
 } from "../services/user.js";
-import type { ExtendedRequest } from "../type/extendedRequest.js";
+import type { ExtendedRequest, ownerType } from "../type/extendedRequest.js";
 import { pageSchema } from "../schema/userPosts.js";
 import { findPostsByUser } from "../services/post.js";
 import { experienceSchema, experienceSkillSchema, updateExperienceSchema } from "../schema/experience.js";
@@ -27,6 +27,7 @@ import { educationSchema, updateEducationSchema } from "../schema/education.js";
 import { certificateSchema, updateCertificateSchema } from "../schema/certificate.js";
 import { updateUserSchema } from "../schema/updateUser.js";
 import { createJWT } from "../utils/jwt.js";
+import { createNotification } from "../services/notification.js";
 
 export const getUsers = async (req: ExtendedRequest, res: Response) => {
   const safeData = pageSchema.safeParse(req.query);
@@ -107,6 +108,7 @@ export const getUserCertificates = async (req: ExtendedRequest, res: Response) =
 
 export const followToggle = async (req: ExtendedRequest, res: Response) => {
   const usernameLogged = req.usernameLogged as string;
+  const usernameToBeFollowed = req.params.username as string;
 
   const user = await findUserByUsername(usernameLogged);
   if (!user) {
@@ -114,13 +116,24 @@ export const followToggle = async (req: ExtendedRequest, res: Response) => {
     return;
   }
 
-  const username = await findUserByUsername(req.params.username as string);
+  const username = await findUserByUsername(usernameToBeFollowed);
   if (!username) {
     res.status(400).json({ error: 'Usuário não encontrado' });
     return;
   }
 
   const follows = await checkIfFollows(user.id, username.id);
+
+  await createNotification({
+    user_id: username.id,
+    actor_id: user.id as number,
+    actor_type: req.accountType as ownerType,
+    type: "Follow",
+    entity_id: username.id,
+    entity_type: "User",
+    message: "seguiu você"
+  });
+
   if (!follows) {
     await follow(user.id, username.id);
     res.json({ following: true });

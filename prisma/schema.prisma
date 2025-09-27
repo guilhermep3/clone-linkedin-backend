@@ -119,15 +119,28 @@ model experiences {
 }
 
 model following {
-  id             Int      @id @default(autoincrement())
+  id             Int        @id @default(autoincrement())
   follower_id    Int
   follower_type  owner_type @default(user)
   following_id   Int
   following_type owner_type @default(user)
-  added_at       DateTime @default(now()) @db.Timestamp(0)
+  added_at       DateTime   @default(now()) @db.Timestamp(0)
 
   @@index([follower_id, follower_type])
   @@index([following_id, following_type])
+}
+
+model notifications {
+  id          Int                      @id @default(autoincrement())
+  user_id     Int
+  actor_id    Int?
+  actor_type  owner_type
+  type        notifications_type
+  entity_id   Int?
+  entity_type notification_entity_type
+  message     String
+  read        Boolean                  @default(false)
+  created_at  DateTime                 @default(now())
 }
 
 model post_comments {
@@ -279,6 +292,19 @@ enum company_employees_employment_type {
   Intern
   Contractor
   Partner
+}
+
+enum notifications_type {
+  Like
+  Comment
+  Follow
+  Share
+}
+
+enum notification_entity_type {
+  Post
+  User
+  Vacancy
 }
 
 enum owner_type {

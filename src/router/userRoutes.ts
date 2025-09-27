@@ -12,7 +12,7 @@ userRoutes.get('/:username/experiences', verifyJWT, userMiddleware, userControll
 userRoutes.get('/:username/userskills', verifyJWT, userMiddleware, userController.getUserSkills);
 userRoutes.get('/:username/educations', verifyJWT, userMiddleware, userController.getUserEducations);
 userRoutes.get('/:username/certificates', verifyJWT, userMiddleware, userController.getUserCertificates);
-userRoutes.post('/:username/follows', verifyJWT, userController.followToggle);
+userRoutes.post('/:username/follows', verifyJWT, userMiddleware, userController.followToggle);
 userRoutes.post('/userskills', verifyJWT, userController.addSkills);
 userRoutes.post('/experiences', verifyJWT, userController.addExperience);
 userRoutes.post('/experiencesskills', verifyJWT, userController.addExperienceSkill);
