@@ -7,7 +7,8 @@ export const userMiddleware = async (req: ExtendedRequest, res: Response, next: 
 
   const user = await findUserByUsername(username);
   if (!user) {
-    return res.status(404).json({ error: "Usuário não encontrado" });
+    res.status(404).json({ error: "Usuário não encontrado" });
+    return;
   }
 
   req.userFound = user;

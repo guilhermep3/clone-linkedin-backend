@@ -1,5 +1,6 @@
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../utils/prisma.js";
+import { getPublicUrl } from "../utils/url.js";
 
 export const findUsers = async (perPage: number, currentPage: number) => {
   const users = await prisma.users.findMany({
@@ -272,4 +273,43 @@ export const deleteCertificateById = async (id: number) => {
   await prisma.certificates.delete({
     where: { id }
   })
+}
+
+export const getUserfollowing = async (id: number) => {
+  const following = [];
+  const reqFollow = await prisma.following.findMany({
+    select: { following_id: true },
+    where: { follower_id: id }
+  })
+
+  for (let reqItem of reqFollow) {
+    following.push(reqItem.following_id);
+  }
+
+  return following;
+}
+
+export const getUserSuggestions = async (id: number) => {
+  const following = await getUserfollowing(id);
+  const followingPlusMe = [...following, id];
+
+  type Suggestion = Pick<Prisma.usersGetPayload<Prisma.usersDefaultArgs>,
+    "name" | "username" | "avatar" | "bio"
+  >;
+
+  const suggestion: Suggestion[] = await prisma.$queryRaw`
+    SELECT
+      name, username, avatar, bio
+    FROM users
+    WHERE
+      id NOT IN (${Prisma.join(followingPlusMe)})
+    ORDER BY RAND()
+    LIMIT 5;
+  `
+
+  for (let sugIndex in suggestion) {
+    suggestion[sugIndex]!.avatar = getPublicUrl(suggestion[sugIndex]!.avatar);
+  }
+
+  return suggestion;
 }

@@ -1,6 +1,6 @@
 import type { Response } from "express";
 import type { ExtendedRequest, ownerType } from "../type/extendedRequest.js";
-import { pageSchema } from "../schema/userPosts.js";
+import { pageSchema } from "../schema/pageSchema.js";
 import {
   checkIfIsLiked, checkIfIsShared, checkIfIsUserCommentary, checkIfIsUserPost, createCommentary, createPost,
   deleteCommentaryById, deletePostById, findPostById, findPostCommentaries,

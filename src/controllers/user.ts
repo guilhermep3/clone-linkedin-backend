@@ -17,7 +17,7 @@ import {
   updateCertificateById
 } from "../services/user.js";
 import type { ExtendedRequest, ownerType } from "../type/extendedRequest.js";
-import { pageSchema } from "../schema/userPosts.js";
+import { pageSchema } from "../schema/pageSchema.js";
 import { findPostsByUser } from "../services/post.js";
 import { experienceSchema, experienceSkillSchema, updateExperienceSchema } from "../schema/experience.js";
 import type { Prisma } from "@prisma/client";

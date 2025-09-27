@@ -2,7 +2,7 @@ import type { Response } from "express";
 import type { ExtendedRequest } from "../type/extendedRequest.js";
 import { updateVacancieSchema, vacancieSchema } from "../schema/vacancie.js";
 import { createVacancie, deleteVacancieById, findVacancieById, findVacancies, updateVacancieById } from "../services/vacancie.js";
-import { pageSchema } from "../schema/userPosts.js";
+import { pageSchema } from "../schema/pageSchema.js";
 import type { Prisma } from "@prisma/client";
 
 export const getVacancies = async (req: ExtendedRequest, res: Response) => {

@@ -1,6 +1,6 @@
 import type { Response } from "express";
 import type { ExtendedRequest } from "../type/extendedRequest.js";
-import { pageSchema } from "../schema/userPosts.js";
+import { pageSchema } from "../schema/pageSchema.js";
 import { findNotifications } from "../services/notification.js";
 
 export const getNotifications = async (req: ExtendedRequest, res: Response) => {

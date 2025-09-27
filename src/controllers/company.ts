@@ -5,7 +5,7 @@ import { createCompany, deleteCompanyById, findCompanies, findCompanyByEmail, fi
 import { hash } from "bcrypt-ts";
 import type { Prisma } from "@prisma/client";
 import slug from "slug";
-import { pageSchema } from "../schema/userPosts.js";
+import { pageSchema } from "../schema/pageSchema.js";
 
 export const addCompany = async (req: ExtendedRequest, res: Response) => {
   const safeData = companySchema.safeParse(req.body);
