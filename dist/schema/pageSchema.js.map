@@ -1,0 +1,1 @@
+{"version":3,"file":"pageSchema.js","sourceRoot":"","sources":["../../src/schema/pageSchema.ts"],"names":[],"mappings":"AAAA,OAAO,CAAC,MAAM,KAAK,CAAC;AAEpB,MAAM,CAAC,MAAM,UAAU,GAAG,CAAC,CAAC,MAAM,CAAC;IACjC,IAAI,EAAE,CAAC,CAAC,MAAM,CAAC,MAAM,EAAE,CAAC,GAAG,CAAC,CAAC,CAAC,CAAC,QAAQ,EAAE;CAC1C,CAAC,CAAA"}

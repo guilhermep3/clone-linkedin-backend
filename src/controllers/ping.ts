@@ -6,5 +6,5 @@ export const ping = (req: Request, res: Response) => {
 }
 
 export const privateping = (req: ExtendedRequest, res: Response) => {
-  res.json({ pong: true, userSlug: req.username });
+  res.json({ pong: true, userSlug: req.usernameLogged });
 }

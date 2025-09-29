@@ -1,0 +1,296 @@
+import { Prisma } from "@prisma/client";
+export declare const findUsers: (perPage: number, currentPage: number) => Promise<{
+    name: string;
+    id: number;
+    username: string;
+    email: string;
+    password: string;
+    phone: string | null;
+    birth_date: Date | null;
+    country: string | null;
+    state: string | null;
+    city: string | null;
+    profession: string;
+    bio: string | null;
+    about: string | null;
+    website: string | null;
+    avatar: string;
+    cover: string;
+    verified: boolean;
+    created_at: Date;
+}[]>;
+export declare const findUserByEmail: (email: string) => Promise<{
+    name: string;
+    id: number;
+    username: string;
+    email: string;
+    password: string;
+    phone: string | null;
+    birth_date: Date | null;
+    country: string | null;
+    state: string | null;
+    city: string | null;
+    profession: string;
+    bio: string | null;
+    about: string | null;
+    website: string | null;
+    avatar: string;
+    cover: string;
+    verified: boolean;
+    created_at: Date;
+} | null>;
+export declare const findUserByUsername: (username: string) => Promise<{
+    name: string;
+    id: number;
+    username: string;
+    email: string;
+    password: string;
+    phone: string | null;
+    birth_date: Date | null;
+    country: string | null;
+    state: string | null;
+    city: string | null;
+    profession: string;
+    bio: string | null;
+    about: string | null;
+    website: string | null;
+    avatar: string;
+    cover: string;
+    verified: boolean;
+    created_at: Date;
+} | null>;
+export declare const createUser: (data: Prisma.usersCreateInput) => Promise<{
+    name: string;
+    id: number;
+    username: string;
+    email: string;
+    password: string;
+    phone: string | null;
+    birth_date: Date | null;
+    country: string | null;
+    state: string | null;
+    city: string | null;
+    profession: string;
+    bio: string | null;
+    about: string | null;
+    website: string | null;
+    avatar: string;
+    cover: string;
+    verified: boolean;
+    created_at: Date;
+}>;
+export declare const getUserFollowingCount: (id: number) => Promise<number>;
+export declare const getUserFollowersCount: (id: number) => Promise<number>;
+export declare const getUserPostsCount: (id: number) => Promise<number>;
+export declare const findUserExperiences: (id: number) => Promise<({
+    experience_skills: {
+        user_skills: {
+            name: string;
+            id: number;
+            created_at: Date;
+            level: string;
+        };
+        experience_validations: {
+            companies: {
+                name: string;
+                id: number;
+                username: string;
+                avatar: string;
+            };
+        }[];
+    }[];
+} & {
+    id: number;
+    user_id: number;
+    company_id: number;
+    role: string;
+    description: string | null;
+    start_date: Date;
+    end_date: Date | null;
+    current: boolean;
+})[]>;
+export declare const findUserSkills: (id: number) => Promise<{
+    name: string;
+    id: number;
+    user_id: number;
+    created_at: Date;
+    level: string;
+}[]>;
+export declare const findUserEducations: (id: number) => Promise<{
+    id: number;
+    user_id: number;
+    description: string;
+    start_date: Date;
+    end_date: Date | null;
+    current: boolean;
+    institution: string;
+    diploma: string;
+    field_of_study: string;
+    grade: string | null;
+}[]>;
+export declare const findUserCertificates: (id: number) => Promise<{
+    name: string;
+    id: number;
+    issuer: string;
+    issue_date: Date | null;
+    user_id: number;
+    image: string | null;
+    credential: string;
+}[]>;
+export declare const checkIfFollows: (follower_id: number, following_id: number) => Promise<boolean>;
+export declare const follow: (follower_id: number, following_id: number) => Promise<{
+    id: number;
+    follower_id: number;
+    follower_type: import("@prisma/client").$Enums.owner_type;
+    following_id: number;
+    following_type: import("@prisma/client").$Enums.owner_type;
+    added_at: Date;
+}>;
+export declare const unfollow: (follower_id: number, following_id: number) => Promise<Prisma.BatchPayload>;
+export declare const createExperience: (data: Prisma.experiencesCreateInput) => Promise<{
+    id: number;
+    user_id: number;
+    company_id: number;
+    role: string;
+    description: string | null;
+    start_date: Date;
+    end_date: Date | null;
+    current: boolean;
+}>;
+export declare const createSkills: (name: string, level: string, user_id: number) => Promise<{
+    name: string;
+    id: number;
+    user_id: number;
+    created_at: Date;
+    level: string;
+}>;
+export declare const findExperienceById: (experience_id: number) => Promise<{
+    id: number;
+    user_id: number;
+    company_id: number;
+    role: string;
+    description: string | null;
+    start_date: Date;
+    end_date: Date | null;
+    current: boolean;
+} | null>;
+export declare const findUserSkillById: (user_skill_id: number) => Promise<{
+    name: string;
+    id: number;
+    user_id: number;
+    created_at: Date;
+    level: string;
+} | null>;
+export declare const createExperienceSkill: (experience_id: number, user_skill_id: number) => Promise<{
+    id: number;
+    experience_id: number;
+    user_skill_id: number;
+    added_at: Date;
+}>;
+export declare const createEducation: (data: Prisma.educationsCreateInput) => Promise<{
+    id: number;
+    user_id: number;
+    description: string;
+    start_date: Date;
+    end_date: Date | null;
+    current: boolean;
+    institution: string;
+    diploma: string;
+    field_of_study: string;
+    grade: string | null;
+}>;
+export declare const createCertificate: (data: Prisma.certificatesCreateInput) => Promise<{
+    name: string;
+    id: number;
+    issuer: string;
+    issue_date: Date | null;
+    user_id: number;
+    image: string | null;
+    credential: string;
+}>;
+export declare const updateUserByUsername: (data: Prisma.usersUpdateInput, username: string) => Promise<{
+    name: string;
+    id: number;
+    username: string;
+    email: string;
+    password: string;
+    phone: string | null;
+    birth_date: Date | null;
+    country: string | null;
+    state: string | null;
+    city: string | null;
+    profession: string;
+    bio: string | null;
+    about: string | null;
+    website: string | null;
+    avatar: string;
+    cover: string;
+    verified: boolean;
+    created_at: Date;
+}>;
+export declare const updateExperienceById: (data: Prisma.experiencesUpdateInput, id: number) => Promise<{
+    id: number;
+    user_id: number;
+    company_id: number;
+    role: string;
+    description: string | null;
+    start_date: Date;
+    end_date: Date | null;
+    current: boolean;
+}>;
+export declare const updateUserSkillsById: (data: Prisma.user_skillsUpdateInput, id: number) => Promise<{
+    name: string;
+    id: number;
+    user_id: number;
+    created_at: Date;
+    level: string;
+}>;
+export declare const updateEducationById: (data: Prisma.educationsUpdateInput, id: number) => Promise<{
+    id: number;
+    user_id: number;
+    description: string;
+    start_date: Date;
+    end_date: Date | null;
+    current: boolean;
+    institution: string;
+    diploma: string;
+    field_of_study: string;
+    grade: string | null;
+}>;
+export declare const updateCertificateById: (data: Prisma.certificatesUpdateInput, id: number) => Promise<{
+    name: string;
+    id: number;
+    issuer: string;
+    issue_date: Date | null;
+    user_id: number;
+    image: string | null;
+    credential: string;
+}>;
+export declare const deleteUserById: (id: number) => Promise<void>;
+export declare const deleteUserSkillById: (id: number) => Promise<void>;
+export declare const deleteExperienceById: (id: number) => Promise<void>;
+export declare const deleteExperienceSkillById: (id: number) => Promise<void>;
+export declare const deleteEducationById: (id: number) => Promise<void>;
+export declare const deleteCertificateById: (id: number) => Promise<void>;
+export declare const getUserfollowing: (id: number) => Promise<number[]>;
+export declare const getUserSuggestions: (id: number) => Promise<Pick<{
+    name: string;
+    id: number;
+    username: string;
+    email: string;
+    password: string;
+    phone: string | null;
+    birth_date: Date | null;
+    country: string | null;
+    state: string | null;
+    city: string | null;
+    profession: string;
+    bio: string | null;
+    about: string | null;
+    website: string | null;
+    avatar: string;
+    cover: string;
+    verified: boolean;
+    created_at: Date;
+}, "name" | "username" | "bio" | "avatar">[]>;
+//# sourceMappingURL=user.d.ts.map

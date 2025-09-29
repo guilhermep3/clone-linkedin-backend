@@ -1,0 +1,27 @@
+import type { Response } from "express";
+import type { ExtendedRequest } from "../type/extendedRequest.js";
+export declare const getUsers: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const getUser: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const getUserPosts: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const getUserExperiences: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const getUserSkills: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const getUserEducations: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const getUserCertificates: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const followToggle: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const addSkills: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const addExperience: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const addExperienceSkill: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const addEducation: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const addCertificate: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const updateUser: (req: ExtendedRequest, res: Response) => Promise<Response<any, Record<string, any>> | undefined>;
+export declare const updateExperience: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const updateUserSkills: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const updateEducation: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const updateCertificate: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const deleteUser: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const deleteUserSkills: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const deleteExperience: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const deleteExperienceSkill: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const deleteEducation: (req: ExtendedRequest, res: Response) => Promise<void>;
+export declare const deleteCertificate: (req: ExtendedRequest, res: Response) => Promise<void>;
+//# sourceMappingURL=user.d.ts.map

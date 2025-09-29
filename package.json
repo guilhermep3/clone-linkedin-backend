@@ -5,8 +5,10 @@
   "license": "ISC",
   "author": "",
   "type": "module",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
     "dev": "node --import=tsx --watch --env-file=.env ./src/server.ts"
   },
   "devDependencies": {

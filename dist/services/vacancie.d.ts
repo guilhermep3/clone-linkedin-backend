@@ -1,0 +1,63 @@
+import type { Prisma } from "@prisma/client";
+export declare const findVacancies: (id: number, perPage: number, currentPage: number) => Promise<{
+    id: number;
+    company_id: number;
+    description: string;
+    title: string;
+    requirements: string | null;
+    benefits: string | null;
+    salary: Prisma.Decimal | null;
+    user_posted_id: number | null;
+    published_at: Date;
+    active: boolean;
+    experience_level: import("@prisma/client").$Enums.vacancies_experience_level;
+    job_type: import("@prisma/client").$Enums.vacancies_job_type;
+    location: import("@prisma/client").$Enums.vacancies_location;
+}[]>;
+export declare const findVacancieById: (id: number) => Promise<{
+    id: number;
+    company_id: number;
+    description: string;
+    title: string;
+    requirements: string | null;
+    benefits: string | null;
+    salary: Prisma.Decimal | null;
+    user_posted_id: number | null;
+    published_at: Date;
+    active: boolean;
+    experience_level: import("@prisma/client").$Enums.vacancies_experience_level;
+    job_type: import("@prisma/client").$Enums.vacancies_job_type;
+    location: import("@prisma/client").$Enums.vacancies_location;
+} | null>;
+export declare const createVacancie: (data: Prisma.vacanciesCreateInput, id: number) => Promise<{
+    id: number;
+    company_id: number;
+    description: string;
+    title: string;
+    requirements: string | null;
+    benefits: string | null;
+    salary: Prisma.Decimal | null;
+    user_posted_id: number | null;
+    published_at: Date;
+    active: boolean;
+    experience_level: import("@prisma/client").$Enums.vacancies_experience_level;
+    job_type: import("@prisma/client").$Enums.vacancies_job_type;
+    location: import("@prisma/client").$Enums.vacancies_location;
+}>;
+export declare const updateVacancieById: (data: Prisma.vacanciesUpdateInput, id: number) => Promise<{
+    id: number;
+    company_id: number;
+    description: string;
+    title: string;
+    requirements: string | null;
+    benefits: string | null;
+    salary: Prisma.Decimal | null;
+    user_posted_id: number | null;
+    published_at: Date;
+    active: boolean;
+    experience_level: import("@prisma/client").$Enums.vacancies_experience_level;
+    job_type: import("@prisma/client").$Enums.vacancies_job_type;
+    location: import("@prisma/client").$Enums.vacancies_location;
+}>;
+export declare const deleteVacancieById: (id: number) => Promise<void>;
+//# sourceMappingURL=vacancie.d.ts.map

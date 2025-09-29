@@ -1,0 +1,1 @@
+{"version":3,"file":"ping.d.ts","sourceRoot":"","sources":["../../src/controllers/ping.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,OAAO,EAAE,QAAQ,EAAE,MAAM,SAAS,CAAC;AACjD,OAAO,KAAK,EAAE,eAAe,EAAE,MAAM,4BAA4B,CAAC;AAElE,eAAO,MAAM,IAAI,GAAI,KAAK,OAAO,EAAE,KAAK,QAAQ,SAE/C,CAAA;AAED,eAAO,MAAM,WAAW,GAAI,KAAK,eAAe,EAAE,KAAK,QAAQ,SAE9D,CAAA"}
