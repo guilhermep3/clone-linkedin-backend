@@ -8,7 +8,9 @@ server.use(cors());
 server.use(urlencoded({ extended: true }));
 server.use(express.json());
 server.use(mainRouter);
-server.listen(process.env.PORT || 3000, () => {
-    console.log(`servidor rodando em: ${process.env.BASE_URL}`);
+const PORT = process.env.PORT || 3000;
+const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+server.listen(PORT, () => {
+    console.log(`Servidor rodando em: ${BASE_URL}`);
 });
 //# sourceMappingURL=server.js.map

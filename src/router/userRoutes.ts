@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as userController from "../controllers/user.js";
 import { verifyJWT } from "../utils/jwt.js";
 import { userMiddleware } from "../utils/userMiddleware.js";
+import { upload } from "../utils/multer.js";
 
 export const userRoutes = Router();
 
@@ -19,8 +20,8 @@ userRoutes.post('/experiencesskills', verifyJWT, userController.addExperienceSki
 userRoutes.post('/educations', verifyJWT, userController.addEducation);
 userRoutes.post('/certificates', verifyJWT, userController.addCertificate);
 userRoutes.put('/', verifyJWT, userController.updateUser);
-// userRoutes.put('/avatar', verifyJWT, userController.updateAvatar);
-// userRoutes.put('/cover', verifyJWT, userController.updateCover);
+userRoutes.put('/avatar', verifyJWT, userMiddleware, upload.single('avatar'), userController.updateAvatar);
+userRoutes.put('/cover', verifyJWT, userMiddleware, upload.single('cover'), userController.updateCover);
 userRoutes.put('/experiences/:id', verifyJWT, userController.updateExperience);
 userRoutes.put('/userskills/:id', verifyJWT, userController.updateUserSkills);
 userRoutes.put('/educations/:id', verifyJWT, userController.updateEducation);

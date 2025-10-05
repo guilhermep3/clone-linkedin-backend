@@ -313,3 +313,17 @@ export const getUserSuggestions = async (id: number) => {
 
   return suggestion;
 }
+
+export const updateUserAvatar = async (id: number, url: string) => {
+  await prisma.users.update({
+    data: { avatar: url },
+    where: { id }
+  })
+}
+
+export const updateUserCover = async (id: number, url: string) => {
+  await prisma.users.update({
+    data: { cover: url },
+    where: { id }
+  })
+}

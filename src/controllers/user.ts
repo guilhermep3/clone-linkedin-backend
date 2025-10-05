@@ -14,7 +14,9 @@ import {
   deleteExperienceSkillById,
   deleteEducationById,
   deleteCertificateById,
-  updateCertificateById
+  updateCertificateById,
+  updateUserAvatar,
+  updateUserCover
 } from "../services/user.js";
 import type { ExtendedRequest, ownerType } from "../type/extendedRequest.js";
 import { pageSchema } from "../schema/pageSchema.js";
@@ -28,6 +30,12 @@ import { certificateSchema, updateCertificateSchema } from "../schema/certificat
 import { updateUserSchema } from "../schema/updateUser.js";
 import { createJWT } from "../utils/jwt.js";
 import { createNotification } from "../services/notification.js";
+import path from "path";
+import fs from "fs";
+import sharp from "sharp";
+import { fileURLToPath } from "url";
+import { v4 } from "uuid";
+import cloudinary from "../utils/cloudinary.js";
 
 export const getUsers = async (req: ExtendedRequest, res: Response) => {
   const safeData = pageSchema.safeParse(req.query);
@@ -424,5 +432,81 @@ export const deleteCertificate = async (req: ExtendedRequest, res: Response) => 
     res.json({ deleted: true });
   } catch (error) {
     res.status(500).json({ error: 'Erro ao deletar certificado', errorDetails: error })
+  }
+}
+
+export const updateAvatar = async (req: ExtendedRequest, res: Response) => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ error: 'Nenhuma imagem enviada.' })
+      return;
+    }
+    if (!req.file.mimetype.startsWith("image/")) {
+      res.status(400).json({ error: "Apenas imagens são permitidas." });
+      return;
+    }
+
+    // processar imagem com buffer
+    const buffer = await sharp(req.file.buffer)
+      .resize(300, 300)
+      .toFormat("jpg")
+      .jpeg({ quality: 80 })
+      .toBuffer();
+
+    // enviar para cloudinary
+    const result: any = await new Promise((resolve, reject) => {
+      const upload = cloudinary.uploader.upload_stream(
+        { public_id: `avatars/${v4()}`, folder: "avatars" },
+        (error, res) => (error ? reject(error) : resolve(res))
+      );
+      upload.end(buffer);
+    })
+
+    // Salvar no banco a URL
+    const url = result.secure_url;
+
+    await updateUserAvatar(req.userFound.id, url);
+
+    res.json({ success: true, url })
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao processar imagem" });
+    return;
+  }
+}
+
+export const updateCover = async (req: ExtendedRequest, res: Response) => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ error: 'Nenhuma imagem enviada.' })
+      return;
+    }
+    if (!req.file.mimetype.startsWith("image/")) {
+      res.status(400).json({ error: "Apenas imagens são permitidas." });
+      return;
+    }
+
+    const buffer = await sharp(req.file.buffer)
+      .resize(1280, 400)
+      .toFormat("jpg")
+      .jpeg({ quality: 80 })
+      .toBuffer();
+
+    const result: any = await new Promise((resolve, reject) => {
+      const upload = cloudinary.uploader.upload_stream(
+        { public_id: `avatars/${v4()}`, folder: "avatars" },
+        (error, res) => (error ? reject(error) : resolve(res))
+      );
+      upload.end(buffer);
+    })
+
+    const url = result.secure_url;
+
+    await updateUserCover(req.userFound.id, url);
+
+    res.json({ success: true, url })
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Erro ao processar a imagem" });
   }
 }

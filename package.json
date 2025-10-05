@@ -17,6 +17,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.5.2",
+    "@types/sharp": "^0.31.1",
     "@types/slug": "^5.0.9",
     "prisma": "^6.16.2",
     "ts-node": "^10.9.2",
@@ -26,12 +27,15 @@
   "dependencies": {
     "@prisma/client": "^6.16.2",
     "bcrypt-ts": "^7.1.0",
+    "cloudinary": "^2.7.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
+    "sharp": "^0.34.4",
     "slug": "^11.0.0",
+    "uuid": "^13.0.0",
     "zod": "^4.1.9"
   }
 }
